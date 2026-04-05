@@ -319,6 +319,15 @@ ScriptsTab:CreateButton({
     end
 })
 
+-- ADDED BRING PARTS BUTTON
+ScriptsTab:CreateButton({
+    Name = "Bring Parts",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hm5650/BringParts/refs/heads/main/loadstring.lua"))()
+        Rayfield:Notify({ Title = "Bring Parts", Content = "Loaded", Duration = 2 })
+    end
+})
+
 -- NOTIFY
 Rayfield:Notify({
     Title = "Twisted Hub",
