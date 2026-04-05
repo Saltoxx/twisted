@@ -78,30 +78,75 @@ print("Anticheat bypassed successfully!")
 -- ============================================
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 local Window = Rayfield:CreateWindow({
     Name = "TWISTED HUB",
     LoadingTitle = "Twisted Hub",
     LoadingSubtitle = "Bypass Active",
-    Theme = "Dark",
+
+    Theme = {
+        TextColor = Color3.fromRGB(255, 255, 255),
+
+        Background = Color3.fromRGB(10, 10, 25),
+        Topbar = Color3.fromRGB(20, 15, 40),
+        Shadow = Color3.fromRGB(0, 0, 0),
+
+        NotificationBackground = Color3.fromRGB(15, 15, 35),
+        NotificationActionsBackground = Color3.fromRGB(30, 30, 60),
+
+        TabBackground = Color3.fromRGB(25, 20, 50),
+        TabStroke = Color3.fromRGB(60, 40, 120),
+        TabBackgroundSelected = Color3.fromRGB(80, 60, 180),
+        TabTextColor = Color3.fromRGB(200, 200, 255),
+        SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
+
+        ElementBackground = Color3.fromRGB(20, 20, 45),
+        ElementBackgroundHover = Color3.fromRGB(30, 25, 70),
+
+        SecondaryElementBackground = Color3.fromRGB(15, 15, 35),
+        ElementStroke = Color3.fromRGB(80, 60, 150),
+        SecondaryElementStroke = Color3.fromRGB(60, 40, 120),
+
+        SliderBackground = Color3.fromRGB(120, 80, 255),
+        SliderProgress = Color3.fromRGB(170, 120, 255),
+        SliderStroke = Color3.fromRGB(200, 150, 255),
+
+        ToggleBackground = Color3.fromRGB(30, 20, 60),
+        ToggleEnabled = Color3.fromRGB(170, 100, 255),
+        ToggleDisabled = Color3.fromRGB(90, 90, 120),
+
+        ToggleEnabledStroke = Color3.fromRGB(200, 150, 255),
+        ToggleDisabledStroke = Color3.fromRGB(120, 120, 140),
+
+        ToggleEnabledOuterStroke = Color3.fromRGB(100, 80, 200),
+        ToggleDisabledOuterStroke = Color3.fromRGB(70, 70, 90),
+
+        DropdownSelected = Color3.fromRGB(40, 30, 80),
+        DropdownUnselected = Color3.fromRGB(25, 20, 50),
+
+        InputBackground = Color3.fromRGB(20, 20, 45),
+        InputStroke = Color3.fromRGB(100, 80, 200),
+        PlaceholderColor = Color3.fromRGB(180, 180, 255)
+    },
+
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "TwistedHub",
         FileName = "Settings"
     },
-    Discord = {
-        Enabled = false
-    },
+
+    Discord = { Enabled = false },
     KeySystem = false
 })
 
--- ONLY 3 TABS - CLEAN
+-- TABS
 local HomeTab = Window:CreateTab("HOME", nil)
 local VisualsTab = Window:CreateTab("VISUALS", nil)
 local ScriptsTab = Window:CreateTab("SCRIPTS", nil)
 
--- ============================================
--- HOME TAB
--- ============================================
+-- HOME
 HomeTab:CreateSection("PLAYER")
 
 local currentWalkSpeed = 16
@@ -116,7 +161,9 @@ HomeTab:CreateToggle({
                 Humanoid.WalkSpeed = 100
                 task.spawn(function()
                     while Value and Humanoid and Humanoid.Parent do
-                        if Humanoid.WalkSpeed ~= currentWalkSpeed then Humanoid.WalkSpeed = currentWalkSpeed end
+                        if Humanoid.WalkSpeed ~= currentWalkSpeed then 
+                            Humanoid.WalkSpeed = currentWalkSpeed 
+                        end
                         task.wait(0.1)
                     end
                 end)
@@ -137,10 +184,15 @@ HomeTab:CreateToggle({
         if Value then
             if infJumpConnection then infJumpConnection:Disconnect() end
             infJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
-                if Humanoid then Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
+                if Humanoid then 
+                    Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) 
+                end
             end)
         else
-            if infJumpConnection then infJumpConnection:Disconnect() infJumpConnection = nil end
+            if infJumpConnection then 
+                infJumpConnection:Disconnect() 
+                infJumpConnection = nil 
+            end
         end
     end
 })
@@ -151,9 +203,7 @@ HomeTab:CreateParagraph({
     Content = "Anticheat: BYPASSED\nWalkSpeed: READY\nJump: READY"
 })
 
--- ============================================
--- VISUALS TAB
--- ============================================
+-- VISUALS
 VisualsTab:CreateSection("TORNADO ESP")
 
 local ESPEnabled = false
@@ -180,7 +230,6 @@ end
 
 local function updateESP()
     if not ESPEnabled then return end
-    
     local storms = workspace:FindFirstChild("storm_related") and workspace.storm_related:FindFirstChild("storms")
     if not storms then return end
     
@@ -203,7 +252,6 @@ local function updateESP()
                                     if not espTexts[storm.Name] then
                                         espTexts[storm.Name] = createTextLabel()
                                     end
-                                    
                                     local label = espTexts[storm.Name]
                                     label.Position = UDim2.new(0, screenPos.X - 60, 0, screenPos.Y - 30)
                                     label.Text = currentWinds .. " MPH"
@@ -224,10 +272,10 @@ local function updateESP()
 end
 
 local function clearESP()
-    for name, label in pairs(espTexts) do
+    for _, label in pairs(espTexts) do
         pcall(function() label:Destroy() end)
-        espTexts[name] = nil
     end
+    espTexts = {}
 end
 
 VisualsTab:CreateColorPicker({
@@ -260,90 +308,18 @@ VisualsTab:CreateToggle({
     end
 })
 
-VisualsTab:CreateSection("ENVIRONMENT")
-
-local Lighting = game:GetService("Lighting")
-local originalBrightness = Lighting.Brightness
-local originalFogEnd = Lighting.FogEnd
-local originalFogStart = Lighting.FogStart
-local originalFogColor = Lighting.FogColor
-local originalAmbient = Lighting.Ambient
-local originalOutdoorAmbient = Lighting.OutdoorAmbient
-
-VisualsTab:CreateToggle({
-    Name = "Fullbright",
-    CurrentValue = false,
-    Flag = "Fullbright",
-    Callback = function(Value)
-        if Value then
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.ExposureCompensation = 1
-            Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-            Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
-        else
-            Lighting.Brightness = originalBrightness
-            Lighting.ClockTime = game:GetService("ReplicatedStorage"):FindFirstChild("clock_time") and game:GetService("ReplicatedStorage").clock_time.Value or 14
-            Lighting.ExposureCompensation = 0
-            Lighting.Ambient = originalAmbient
-            Lighting.OutdoorAmbient = originalOutdoorAmbient
-        end
-    end
-})
-
-VisualsTab:CreateToggle({
-    Name = "No Fog",
-    CurrentValue = false,
-    Flag = "NoFog",
-    Callback = function(Value)
-        if Value then
-            Lighting.FogEnd = 100000
-            Lighting.FogStart = 100000
-            Lighting.FogColor = Color3.fromRGB(0, 0, 0)
-        else
-            Lighting.FogEnd = originalFogEnd
-            Lighting.FogStart = originalFogStart
-            Lighting.FogColor = originalFogColor
-        end
-    end
-})
-
--- ============================================
--- SCRIPTS TAB
--- ============================================
+-- SCRIPTS
 ScriptsTab:CreateSection("SCRIPT LOADER")
 
 ScriptsTab:CreateButton({
     Name = "Infinite Yield",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-        Rayfield:Notify({
-            Title = "Infinite Yield",
-            Content = "Loaded",
-            Duration = 2,
-        })
+        Rayfield:Notify({ Title = "Infinite Yield", Content = "Loaded", Duration = 2 })
     end
 })
 
-ScriptsTab:CreateButton({
-    Name = "Bring Parts",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/hm5650/BringParts/refs/heads/main/loadstring.lua"))()
-        Rayfield:Notify({
-            Title = "Bring Parts",
-            Content = "Loaded",
-            Duration = 2,
-        })
-    end
-})
-
-ScriptsTab:CreateSection("INFO")
-ScriptsTab:CreateParagraph({
-    Title = "Tips",
-    Content = "ESP Color can be changed\nFullbright and No Fog are toggles"
-})
-
--- Startup Notification
+-- NOTIFY
 Rayfield:Notify({
     Title = "Twisted Hub",
     Content = "Ready",
