@@ -1,4 +1,7 @@
--- RAYFIELD STYLE UI + ANTICHEAT BYPASS + INFINITE YIELD + BRING PARTS (SLIM) + TORNADO ESP + MOD ALERT
+--[[
+    WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+-- RAYFIELD STYLE UI + ANTICHEAT BYPASS + INFINITE YIELD + BRING PARTS (SLIM) + TORNADO ESP + MOD ALERT + CAR ANCHOR + INSTANT PROBES
 -- CLEAN NO EMOJIS VERSION
 
 print("=== LOADING ANTICHEAT BYPASS FIRST ===")
@@ -296,6 +299,7 @@ local Window = Rayfield:CreateWindow({
 -- TABS
 local HomeTab = Window:CreateTab("HOME", nil)
 local VisualsTab = Window:CreateTab("VISUALS", nil)
+local VehicleTab = Window:CreateTab("VEHICLE", nil) -- NEW TAB
 local ScriptsTab = Window:CreateTab("SCRIPTS", nil)
 
 -- HOME
@@ -479,6 +483,86 @@ VisualsTab:CreateToggle({
     end
 })
 
+-- ============================================
+-- VEHICLE TAB (ANCHOR & PROBES)
+-- ============================================
+VehicleTab:CreateSection("ANCHOR CONTROLS")
+
+local targetVehicleId = "9113321512"
+
+VehicleTab:CreateToggle({
+    Name = "Anchor Car",
+    CurrentValue = false,
+    Flag = "CarAnchorToggle",
+    Callback = function(Value)
+        local found = false
+        local targetGroupName = "Vehicle" .. targetVehicleId
+        
+        for _, part in ipairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") and part.CollisionGroup == targetGroupName then
+                part.Anchored = Value
+                found = true
+            end
+        end
+        
+        if found then
+            Rayfield:Notify({ Title = "Vehicle", Content = Value and "Anchored" or "Unanchored", Duration = 2 })
+        else
+            Rayfield:Notify({ Title = "Error", Content = "Vehicle " .. targetVehicleId .. " not found", Duration = 3 })
+        end
+    end
+})
+
+VehicleTab:CreateInput({
+    Name = "Update Car ID",
+    PlaceholderText = "9113321512",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        targetVehicleId = Text
+        Rayfield:Notify({ Title = "ID Saved", Content = "Targeting Vehicle" .. Text, Duration = 2 })
+    end,
+})
+
+VehicleTab:CreateSection("PROBE CONTROLS")
+
+local probesEnabled = false
+local probesFolder = workspace:FindFirstChild("player_related") and workspace.player_related:FindFirstChild("probes")
+
+local function modifyPrompt(object)
+    if not probesEnabled then return end
+    local prompt = object:FindFirstChild("PromptPart") and object.PromptPart:FindFirstChild("Prompt")
+    
+    if prompt and prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+        prompt.Enabled = true
+        prompt.MaxActivationDistance = 20
+    end
+end
+
+VehicleTab:CreateToggle({
+    Name = "Instant Probes",
+    CurrentValue = false,
+    Flag = "InstantProbes",
+    Callback = function(Value)
+        probesEnabled = Value
+        if Value and probesFolder then
+            for _, probe in pairs(probesFolder:GetChildren()) do
+                modifyPrompt(probe)
+            end
+            Rayfield:Notify({ Title = "Probes", Content = "Instant interaction enabled", Duration = 2 })
+        end
+    end
+})
+
+if probesFolder then
+    probesFolder.ChildAdded:Connect(function(newProbe)
+        task.wait(0.1)
+        if probesEnabled then
+            modifyPrompt(newProbe)
+        end
+    end)
+end
+
 -- SCRIPTS
 ScriptsTab:CreateSection("SCRIPT LOADER")
 
@@ -513,4 +597,4 @@ Rayfield:Notify({
     Duration = 2,
 })
 
-print("Twisted Hub Loaded (Slim Version)")
+print("Twisted Hub Loaded")
